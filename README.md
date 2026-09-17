@@ -2,175 +2,197 @@
 
 An AI-powered support ticket analysis system that allows users to ask natural-language questions about support tickets.
 
-The system uses a local LLM through Ollama to understand user questions and converts them into structured queries. Pandas then performs the actual data analysis.
+The system uses a local LLM through Ollama to convert user questions into structured queries. Pandas performs the actual data analysis.
 
 ## Features
 
-- CSV support ticket data ingestion
-- Natural-language question answering
-- Local LLM integration using Ollama
-- Support ticket filtering and analysis
-- Average response and resolution time analysis
-- Agent performance analysis
-- Customer rating analysis
-- Anomaly detection using IQR
-- Detection of unresolved high-priority tickets older than 24 hours
-- REST API using FastAPI
-- Interactive UI using Streamlit
+- CSV data ingestion
+- Natural-language querying
+- Local LLM using Ollama
+- Support ticket analysis and filtering
+- Agent and customer rating analysis
+- IQR-based anomaly detection
+- FastAPI REST API
+- Streamlit UI
+- Automated API tests
 
-## Project Architecture
+## Architecture
 
-text
+```text
 User
-  |
-  v
+  ↓
 Streamlit UI
-  |
-  v
+  ↓
 FastAPI
-  |
-  v
+  ↓
 Ollama LLM
-  |
-  v
+  ↓
 Structured Query
-  |
-  v
-Query Engine
-  |
-  v
-Pandas DataFrame
-  |
-  +------> Anomaly Detector
-  |
-  v
-API Response
+  ↓
+Pandas Query Engine
+  ↓
+Result
+```
 
-##Project Structure
+## Project Structure
 
+```text
 AI_Engineer_Assessment/
-│
-├── data/
-│   └── support_tickets.csv
-│
 ├── app/
-│   ├── __init__.py
 │   ├── main.py
 │   ├── data_loader.py
 │   ├── query_engine.py
 │   ├── llm.py
 │   ├── anomaly_detector.py
 │   └── models.py
-│
-├── ui/
-│   └── streamlit_app.py
-│
+├── data/
+│   └── support_tickets.csv
 ├── tests/
 │   └── test_api.py
-│
+├── ui/
+│   └── streamlit_app.py
 ├── requirements.txt
 ├── README.md
+├── start.bat
 └── .gitignore
+```
 
-Technologies Used
-Python
-Pandas
-FastAPI
-Uvicorn
-Streamlit
-Ollama
-Llama 3.2 3B
-Pydantic
+## Technologies
 
-Installation
+- Python
+- Pandas
+- FastAPI
+- Streamlit
+- Ollama
+- Llama 3.2 3B
+- Pytest
+
+## Setup
 
 Create and activate a virtual environment:
-python -m venv venv
 
-Activate it:
+```powershell
+python -m venv venv
 .\venv\Scripts\Activate.ps1
+```
 
 Install dependencies:
+
+```powershell
 pip install -r requirements.txt
+```
 
-Ollama Setup
+Install the Ollama model:
 
-Install Ollama and download the model:
+```powershell
 ollama pull llama3.2:3b
+```
 
-Run the API
+## Run
 
-Start FastAPI:
-uvicorn app.main:app --reload
+Start the complete application:
 
-API documentation:
+```powershell
+.\start.bat
+```
+
+FastAPI:
+
+```text
 http://127.0.0.1:8000/docs
+```
 
-Run the UI
+Streamlit:
 
-Open another terminal, activate the virtual environment, and run:
-streamlit run ui/streamlit_app.py
+```text
+http://localhost:8501
+```
 
-API Endpoints
-Health Check
+## API Endpoints
 
+### Health
+
+```text
 GET /health
+```
 
-Example response:
+### Natural Language Query
 
-{
-  "status": "ok"
-}
-
-Natural Language Query
+```text
 POST /query
+```
 
-Example request:
+Example:
 
+```json
 {
   "question": "How many open tickets are there?"
 }
+```
 
-Example response:
+### Anomaly Detection
 
-{
-  "question": "How many open tickets are there?",
-  "answer": 111
-}
-
-Anomaly Detection
+```text
 GET /anomalies
+```
 
-##Example Questions
+## Example Questions
 
-The system can answer questions such as:
-How many open tickets are there?
+- How many open tickets are there?
+- How many critical tickets are unresolved?
+- What is the average response time?
+- Which agent resolved the most tickets?
+- Which agent has the lowest average customer rating?
+- Show me anomalies from this week.
+- Show me unresolved high-priority tickets older than 24 hours.
 
-How many critical tickets are there?
+## LLM Approach
 
-What is the average response time?
+The LLM interprets the user's question and produces a structured query.
 
-What is the average resolution time?
+Example:
 
-Which agent resolved the most tickets?
+```json
+{
+  "action": "count",
+  "column": "status",
+  "value": "Open"
+}
+```
 
-Which agent resolved the most tickets this month?
+Pandas then performs the actual calculation. This keeps numerical results deterministic.
 
-What is the average customer rating for Technical tickets?
+## Anomaly Detection
 
-Show me anomalies from this week.
+The system uses the IQR method:
 
-Show me unresolved high-priority tickets older than 24 hours.
+```text
+IQR = Q3 - Q1
+Upper Limit = Q3 + 1.5 × IQR
+```
 
-Show me all Critical tickets not resolved within 12 hours.
+Tickets above the upper limit are treated as resolution-time anomalies.
 
+## Testing
 
-Cost
+Run:
 
-The project uses a local Ollama model, so no paid API key is required.
+```powershell
+pytest -q
+```
 
-Limitations
-The support ticket dataset is static.
-"This week" and "this month" are interpreted relative to the latest date available in the dataset.
-The system currently supports predefined query types.
-Ollama must be installed locally to use the LLM functionality.
+Current result:
+
+```text
+5 passed
+```
+
+## Cost
+
+The project uses a local Ollama model and does not require a paid API key.
+
+## Limitations
+
+- Dataset is static.
+- Only predefined query types are currently supported.
+- Ollama must be installed locally.
